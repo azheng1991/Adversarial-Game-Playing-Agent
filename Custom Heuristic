@@ -1,13 +1,6 @@
-
-
-import logging
-import pickle
-import random
-import itertools
-
-logger = logging.getLogger(__name__)
-
 from sample_players import DataPlayer
+from functools import reduce
+
 
 class CustomPlayer(DataPlayer):
     """ Implement your own agent to play knight's Isolation
@@ -31,23 +24,24 @@ class CustomPlayer(DataPlayer):
         for cutting off the function after the search time limit has expired.
         See RandomPlayer and GreedyPlayer in sample_players for more examples.
         **********************************************************************
-        NOTE:
+        NOTE: 
         - The caller is responsible for cutting off search, so calling
           get_action() from your own code will create an infinite loop!
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
-        # randomly select a move as player 1 or 2 on an empty board, otherwise
-        # return the optimal minimax move using iterative deepening
-        #print(self.__class__.__name__)
-        
-
+        # TODO: Replace the example implementation below with your own search
+        #       method by combining techniques from lecture
+        #
+        # EXAMPLE: choose a random move without any search--this function MUST
+        #          call self.queue.put(ACTION) at least once before time expires
+        #          (the timer is automatically managed for you)
+        import random
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
-            d = 2
-            self.queue.put(self.alpha_beta_search(state, depth=d))
-            
+            self.queue.put(self.alpha_beta_search(state, depth=3))
+
     def alpha_beta_search(self, state, depth):
 
         def min_value(state, alpha, beta, depth):
@@ -55,11 +49,10 @@ class CustomPlayer(DataPlayer):
             if depth <= 0: return self.score(state)
             value = float("inf")
             for action in state.actions():
-                value = min(value, max_value(state.result(action), alpha, beta, depth - 1))
+                value = min(value, max_value(state.result(action), alpha, beta, depth-1))
                 if value <= alpha:
                     return value
-                else:
-                    beta = min(beta, value)
+                beta = min(beta, value)
             return value
 
         def max_value(state, alpha, beta, depth):
@@ -67,133 +60,29 @@ class CustomPlayer(DataPlayer):
             if depth <= 0: return self.score(state)
             value = float("-inf")
             for action in state.actions():
-                value = max(value, min_value(state.result(action), alpha, beta, depth - 1))
+                value = max(value, min_value(state.result(action), alpha, beta, depth-1))
                 if value >= beta:
                     alpha = max(alpha, value)
             return value
 
-        alpha = float("-inf")
-        beta = float("+inf")
-        best_score = float("-inf")
-        best_move = None
+        def get_move(best_options, next_action):
+            (best_move, best_score, alpha) = best_options
+            value = min_value(state.result(next_action), alpha, float("-inf"), depth-1)
+            alpha = max(alpha, value)
+            return (next_action, value, alpha) if value >= best_score else (best_move, best_score, alpha)
 
-        for a in state.actions():
-            v = min_value(state.result(a), alpha, beta, depth - 1)
-            alpha = max(alpha, v)
-            if v > best_score:
-                best_score = v
-                best_move = a
-        return best_move
+        return reduce(
+            get_move,
+            state.actions(),
+            (None, float("-inf"), float("-inf"))
+        )[0]
 
     def score(self, state):
         own_loc = state.locs[self.player_id]
         opp_loc = state.locs[1 - self.player_id]
         own_liberties = state.liberties(own_loc)
         opp_liberties = state.liberties(opp_loc)
-        return len(own_liberties) - len(opp_liberties)
-
-class HeuristicPlayer1(BaselinePlayer):
- if state.ply_count < 2:
-            self.queue.put(random.choice(state.actions()))
-        else:
-            d = 2
-            self.queue.put(self.alpha_beta_search(state, depth=d))
-            
-    def alpha_beta_search(self, state, depth):
-
-        def min_value(state, alpha, beta, depth):
-            if state.terminal_test(): return state.utility(self.player_id)
-            if depth <= 0: return self.score(state)
-            value = float("inf")
-            for action in state.actions():
-                value = min(value, max_value(state.result(action), alpha, beta, depth - 1))
-                if value <= alpha:
-                    return value
-                else:
-                    beta = min(beta, value)
-            return value
-
-        def max_value(state, alpha, beta, depth):
-            if state.terminal_test(): return state.utility(self.player_id)
-            if depth <= 0: return self.score(state)
-            value = float("-inf")
-            for action in state.actions():
-                value = max(value, min_value(state.result(action), alpha, beta, depth - 1))
-                if value >= beta:
-                    alpha = max(alpha, value)
-            return value
-
-        alpha = float("-inf")
-        beta = float("+inf")
-        best_score = float("-inf")
-        best_move = None
-
-        for a in state.actions():
-            v = min_value(state.result(a), alpha, beta, depth - 1)
-            alpha = max(alpha, v)
-            if v > best_score:
-                best_score = v
-                best_move = a
-        return best_move   
-    
-    def score(self, state):
-        depth = 
-        _count
-        own_loc = state.locs[self.player_id]
-        opp_loc = state.locs[1 - self.player_id]
-        own_liberties = state.liberties(own_loc)
-        opp_liberties = state.liberties(opp_loc)
-        return len(own_liberties)
-
-class HeuristicPlayer2(BaselinePlayer):
- if state.ply_count < 2:
-            self.queue.put(random.choice(state.actions()))
-        else:
-            d = 2
-            self.queue.put(self.alpha_beta_search(state, depth=d))
-            
-    def alpha_beta_search(self, state, depth):
-
-        def min_value(state, alpha, beta, depth):
-            if state.terminal_test(): return state.utility(self.player_id)
-            if depth <= 0: return self.score(state)
-            value = float("inf")
-            for action in state.actions():
-                value = min(value, max_value(state.result(action), alpha, beta, depth - 1))
-                if value <= alpha:
-                    return value
-                else:
-                    beta = min(beta, value)
-            return value
-
-        def max_value(state, alpha, beta, depth):
-            if state.terminal_test(): return state.utility(self.player_id)
-            if depth <= 0: return self.score(state)
-            value = float("-inf")
-            for action in state.actions():
-                value = max(value, min_value(state.result(action), alpha, beta, depth - 1))
-                if value >= beta:
-                    alpha = max(alpha, value)
-            return value
-
-        alpha = float("-inf")
-        beta = float("+inf")
-        best_score = float("-inf")
-        best_move = None
-
-        for a in state.actions():
-            v = min_value(state.result(a), alpha, beta, depth - 1)
-            alpha = max(alpha, v)
-            if v > best_score:
-                best_score = v
-                best_move = a
-        return best_move   
-
-    def score(self, state):
-        
-        depth = state.ply_count
-        own_loc = state.locs[self.player_id]
-        opp_loc = state.locs[1 - self.player_id]
-        own_liberties = state.liberties(own_loc)
-        opp_liberties = state.liberties(opp_loc)
-        return len(own_liberties) - 3*len(opp_liberties)
+        remaining_own_liberties = sum(len(state.liberties(l)) for l in own_liberties)
+        remaining_opp_liberties = sum(len(state.liberties(l)) for l in opp_liberties)
+        return len(own_liberties) - 3 * len(opp_liberties) + remaining_own_liberties - 3 * remaining_opp_liberties
+        # return len(own_liberties) - len(opp_liberties)
