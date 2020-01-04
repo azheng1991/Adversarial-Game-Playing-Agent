@@ -1,6 +1,11 @@
+Project description: 
+•	Developed heuristics in Python to play Knight’s Isolation game 
+•	Employed a baseline agent that used alpha-beta search as well as the minimax algorithm
+•	Compared performance of custom heuristic to baseline in terms of win percentage
+
+
 from sample_players import DataPlayer
 from functools import reduce
-
 
 class CustomPlayer(DataPlayer):
     """ Implement your own agent to play knight's Isolation
